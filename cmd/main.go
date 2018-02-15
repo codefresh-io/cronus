@@ -75,7 +75,7 @@ Copyright © Codefresh.io`, version.ASCIILogo)
 				},
 				cli.BoolFlag{
 					Name:  "dry-run",
-					Usage: "do not execute commands, just log",
+					Usage: "do not execute triggers, just log to console",
 				},
 			},
 			Usage: "start cronus server",
@@ -203,12 +203,19 @@ func subscribeToEvent(c *gin.Context) {
 	if err != nil {
 		log.WithError(err).Warn("failed to get cron expression description")
 	}
+	// set status to active
+	event.Status = "active"
+	// set help string
+	event.Help = `Cronus cron event provider triggers Codefresh pipeline execution, following cron expression.
+	Supported cron expression syntax:
+	https://github.com/codefresh-io/cronus/docs/blob/master/expression.md`
 	// add cron job
 	err = runner.AddCronJob(*event)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, event)
 }
 
