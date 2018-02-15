@@ -1,0 +1,14 @@
+# dev tools
+.idea
+.cover
+.vscode
+.bin
+.gtm
+
+# dep files
+Gopkg.*
+
+# helm charts
+nomios
+*.tgz
+index.yaml

@@ -1,0 +1,14 @@
+# dev tools
+.idea
+.bin
+.vscode
+.cover
+
+# debugger binaries
+**/debug.test
+**/debug
+
+# packaged charts
+**/*.tgz
+index.yaml
+/.gtm/
