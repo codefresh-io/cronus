@@ -22,11 +22,18 @@ POST ${HERMES_SERVICE}/trigger/${event}
 
 ### Fields
 
-- URL `event` - event URI in form `cron:codefresh:{min.exp}-{hour.exp}-{day.exp}-{month.exp}-{day.week.exp}`; `XXX.exp` is a URL friendly `cron` expression, see replacement table below
+- URL `event` - cronus event URI
 - PAYLOAD `secret` - event secret
 - PAYLOAD `variables` - set of variables
 - PAYLOAD `variables:message` - event short text message (as specified when created)
 - PAYLOAD `variables:timestamp` - event timestamp `{time RFC 3339}`
+
+### Cronus Event URI
+
+`cron:codefresh:{{cron-expression '+'}}:{{message}}`
+
+- `cron-expression '+'` - cron expression format (see below) with `space` character replaced by `+`
+- `message` - message to be send with each cron trigger event; should be short and alpha-numeric only (no space characters); `[a-z0-9]+` regex
 
 ## CRON Expression Format
 
@@ -38,7 +45,7 @@ Run the `cronus server` command to start *cronus* CRON Event Provider.
 
 ```sh
 NAME:
-   cronus server - start cronus CRON event provider server
+   cronus server - start cronus server
 
 USAGE:
    cronus server [command options] [arguments...]
@@ -46,9 +53,13 @@ USAGE:
 DESCRIPTION:
    Run Cronus CRON Event Provider server. Cronus generates time-based events and sends normalized event payload to the Codefresh Hermes trigger manager service to invoke associated Codefresh pipelines.
 
+    Event URI Pattern: cron:codefresh:{{cron-expression}}:{{message}}
+
 OPTIONS:
-   --hermes value, --hm value  Codefresh Hermes service (default: "http://hermes/") [$HERMES_SERVICE]
-   --token value, -t value     Codefresh Hermes API token (default: "TOKEN") [$HERMES_TOKEN]
+   --hermes value           Codefresh Hermes service (default: "http://hermes/") [$HERMES_SERVICE]
+   --token value, -t value  Codefresh Hermes API token (default: "TOKEN") [$HERMES_TOKEN]
+   --port value             TCP port for the dockerhub provider server (default: 8080)
+   --dry-run                do not execute commands, just log
 ```
 
 ## Building cronus

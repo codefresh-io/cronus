@@ -2,6 +2,7 @@ package cron
 
 import (
 	"errors"
+	"strings"
 	"sync"
 	"time"
 
@@ -50,7 +51,9 @@ func (r *Runner) init() {
 	}
 	// add already defined CRON jobs
 	for _, e := range events {
-		job, err := r.cron.AddFunc(e.Expression, func() { r.triggerEvent(e) })
+		// make valid cron expression - replace all '+' with spaces
+		expression := strings.Replace(e.Expression, "+", " ", -1)
+		job, err := r.cron.AddFunc(expression, func() { r.triggerEvent(e) })
 		if err != nil {
 			log.WithError(err).Warn("failed to create a new cron job")
 		}
@@ -93,8 +96,10 @@ func (r *Runner) AddCronJob(e types.Event) error {
 	if ok {
 		return errors.New("this cron job already exist")
 	}
+	// make valid cron expression - replace all '+' with spaces
+	expression := strings.Replace(e.Expression, "+", " ", -1)
 	// add cron job to job runner
-	job, err := r.cron.AddFunc(e.Expression, func() { r.triggerEvent(e) })
+	job, err := r.cron.AddFunc(expression, func() { r.triggerEvent(e) })
 	if err != nil {
 		return errors.New("failed to create a new cron job")
 	}
