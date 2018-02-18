@@ -12,7 +12,7 @@ steps:
     description: create Cronus CRON Event Provider image with multi-stage build
     dockerfile: Dockerfile
     working_directory: ${{main_clone}}
-    image_name: codefresh/nomios
+    image_name: codefresh/cronus
     build_arguments:
       - VCS_COMMIT_ID=${{CF_REVISION}}
       - VCS_BRANCH_NAME=${{CF_BRANCH}}

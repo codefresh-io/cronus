@@ -9,6 +9,6 @@
 Gopkg.*
 
 # helm charts
-nomios
+cronus
 *.tgz
 index.yaml

@@ -53,7 +53,7 @@ FROM godev AS builder
 RUN hack/build.sh
 
 #
-# ------ Nomios DockerHub Event Provider image ------
+# ------ Cronus CRON Event Provider image ------
 #
 FROM alpine:3.7
 

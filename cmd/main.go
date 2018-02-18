@@ -175,7 +175,7 @@ func runServer(c *cli.Context) error {
 
 	// run server
 	port := c.Int("port")
-	log.WithField("port", port).Debug("starting nomios server")
+	log.WithField("port", port).Debug("starting cronus server")
 	return router.Run(fmt.Sprintf(":%d", port))
 }
 
