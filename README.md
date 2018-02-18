@@ -1,6 +1,5 @@
 # cronus - Codefresh DockerHub Event Provider
-
-[![Go Report Card](https://goreportcard.com/badge/github.com/codefresh-io/cronus)](https://goreportcard.com/report/github.com/codefresh-io/cronus) [![codecov](https://codecov.io/gh/codefresh-io/cronus/branch/master/graph/badge.svg)](https://codecov.io/gh/codefresh-io/cronus)
+[![Codefresh build status]( https://g.codefresh.io/api/badges/build?repoOwner=codefresh-io&repoName=cronus&branch=master&pipelineName=cronus&accountName=codefresh-inc&type=cf-1)]( https://g.codefresh.io/repositories/codefresh-io/cronus/builds?filter=trigger:build;branch:master;service:5a8999cf6b985f0001c6142b~cronus) [![Go Report Card](https://goreportcard.com/badge/github.com/codefresh-io/cronus)](https://goreportcard.com/report/github.com/codefresh-io/cronus) [![codecov](https://codecov.io/gh/codefresh-io/cronus/branch/master/graph/badge.svg)](https://codecov.io/gh/codefresh-io/cronus)
 
 [![](https://images.microbadger.com/badges/image/codefresh/cronus.svg)](http://microbadger.com/images/codefresh/cronus) [![](https://images.microbadger.com/badges/commit/codefresh/cronus.svg)](https://microbadger.com/images/codefresh/cronus) [![Docker badge](https://img.shields.io/docker/pulls/codefresh/cronus.svg)](https://hub.docker.com/r/codefresh/cronus/)
 
