@@ -8,6 +8,12 @@
   version = "v1.3.1"
 
 [[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
+
+[[projects]]
   name = "github.com/dghubble/sling"
   packages = ["."]
   revision = "eb56e89ac5088bebb12eef3cb4b293300f43608b"
@@ -44,10 +50,28 @@
   version = "v0.0.3"
 
 [[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   revision = "881bee4e20a5d11a6a88a5667c6f292072ac1963"
+
+[[projects]]
+  name = "github.com/stretchr/objx"
+  packages = ["."]
+  revision = "facf9a85c22f48d2f52f2380e4efce1768749a89"
+  version = "v0.1"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert","mock"]
+  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
+  version = "v1.2.1"
 
 [[projects]]
   name = "github.com/ugorji/go"
@@ -88,6 +112,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bfd90d1a545925d18332f4c1d986a7cf2543c7f76aad4f4a607b9ce168e3326d"
+  inputs-digest = "ef33ef2af32c3235c5c20e1c4033d292abbc959840f0985cac6154a8ab868b04"
   solver-name = "gps-cdcl"
   solver-version = 1

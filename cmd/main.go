@@ -193,22 +193,11 @@ func getEventInfo(c *gin.Context) {
 func subscribeToEvent(c *gin.Context) {
 	uri := c.Param("uri")
 	secret := c.Param("secret")
-	event, err := types.ConstructEvent(uri, secret, "")
+	event, err := types.ConstructEvent(uri, secret, cronguru)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	// get cron expression descriptor
-	event.Description, err = cronguru.DescribeCronExpression(event.Expression)
-	if err != nil {
-		log.WithError(err).Warn("failed to get cron expression description")
-	}
-	// set status to active
-	event.Status = "active"
-	// set help string
-	event.Help = `Cronus cron event provider triggers Codefresh pipeline execution, following cron expression.
-	Supported cron expression syntax:
-	https://github.com/codefresh-io/cronus/docs/blob/master/expression.md`
 	// add cron job
 	err = runner.AddCronJob(*event)
 	if err != nil {

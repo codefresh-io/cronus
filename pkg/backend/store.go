@@ -2,7 +2,6 @@ package backend
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/boltdb/bolt"
@@ -58,6 +57,10 @@ func (b *BoltEventStore) StoreEvent(event types.Event) error {
 func (b *BoltEventStore) DeleteEvent(uri string) error {
 	return b.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(events)
+		v := bucket.Get([]byte(uri))
+		if v == nil {
+			return types.ErrEventNotFound
+		}
 		return bucket.Delete([]byte(uri))
 	})
 }
@@ -69,11 +72,14 @@ func (b *BoltEventStore) GetEvent(uri string) (*types.Event, error) {
 		bucket := tx.Bucket(events)
 		v := bucket.Get([]byte(uri))
 		if v == nil {
-			return errors.New("cron event not found")
+			return types.ErrEventNotFound
 		}
 		return json.Unmarshal(v, &event)
 	})
-	return &event, err
+	if err != nil {
+		return nil, err
+	}
+	return &event, nil
 }
 
 // GetAllEvents get all stored events
@@ -93,4 +99,16 @@ func (b *BoltEventStore) GetAllEvents() ([]types.Event, error) {
 		return nil
 	})
 	return all, nil
+}
+
+// GetDBStats get number of records
+func (b *BoltEventStore) GetDBStats() (int, error) {
+	var records int
+	err := b.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(events)
+		stats := bucket.Stats()
+		records = stats.KeyN
+		return nil
+	})
+	return records, err
 }
