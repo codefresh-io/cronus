@@ -15,8 +15,8 @@ data:
       "type": "cron",
       "kind": "codefresh",
       "service-url": "http://{{ template "cronus.fullname" . }}:{{ .Values.service.externalPort }}",
-      "uri-template": "cron:codefresh:{{"{{"}}expression{{"}}"}}:{{"{{"}}message{{"}}"}}:push",
-      "uri-regex": "^cron:codefresh:@yearly|@annually|@montly|@weekly|@daily|@midnight|@hourly|([a-zA-Z0-9_-][a-zA-Z0-9*/,-?]+\s?){6}:[a-zA-Z0-9_-]{1,30}$",
+      "uri-template": "cron:codefresh:{{"{{"}}expression{{"}}"}}:{{"{{"}}message{{"}}"}}",
+      "uri-regex": "^cron:codefresh:@yearly|@annually|@montly|@weekly|@daily|@midnight|@hourly|([a-zA-Z0-9*/,-?]+\\s?){6}:[a-zA-Z0-9_-]{2,64}$",
       "config": [{
               "name": "expression",
               "type": "cron",
