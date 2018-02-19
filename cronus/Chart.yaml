@@ -1,0 +1,17 @@
+apiVersion: v1
+description: Cronus - Codefresh CRON Event Provider
+name: cronus
+version: 0.1.1
+icon: https://raw.githubusercontent.com/codefresh-io/cronus/master/docs/img/cron.png
+keywords:
+  - codefresh
+  - triggers
+  - cron
+  - event provider
+home: https://github.com/codefresh-io/cronus
+sources:
+  - https://github.com/codefresh-io/cronus
+maintainers: # (optional)
+  - name: Alexei Ledenev
+    email: alexei.led@gmail.com
+appVersion: 0.1

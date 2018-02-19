@@ -72,7 +72,7 @@ Copyright © Codefresh.io`, version.ASCIILogo)
 					Name:   "store",
 					Usage:  "BoltDB storage file",
 					Value:  "/var/tmp/events.db",
-					EnvVar: "HERMES_TOKEN",
+					EnvVar: "STORE_FILE",
 				},
 				cli.IntFlag{
 					Name:  "port",
