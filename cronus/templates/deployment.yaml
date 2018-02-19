@@ -19,9 +19,9 @@ spec:
         action: {{ .Values.event.action }}
     spec:
       volumes:
-        - name: boltdb-storage
+        - name: boltdb-store
           persistentVolumeClaim:
-            claimName: "{{ .Release.Name }}-{{ .Values.store.name }}"
+            claimName: {{ template "cronus.fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -43,7 +43,7 @@ spec:
               value: "/var/boltdb/events.db"
           volumeMounts:
             - mountPath: "/var/boltdb"
-              name: boltdb-storage
+              name: boltdb-store
           livenessProbe:
             httpGet:
               path: /version

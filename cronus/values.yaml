@@ -19,11 +19,10 @@ event:
   
 service:
   name: cronus
-  type: NodePort
+  type: ClusterIP
   externalPort: 80
   internalPort: 8080
 
 # BoltDb store size
 store:
   size: 1Gi
-  name: boltdb
