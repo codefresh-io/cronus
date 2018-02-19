@@ -3,6 +3,7 @@ package hermes
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/dghubble/sling"
 	log "github.com/sirupsen/logrus"
@@ -47,7 +48,7 @@ func (api *APIEndpoint) TriggerEvent(eventURI string, event *NormalizedEvent) er
 	// runs response
 	type PipelineRun struct {
 		ID    string `json:"id"`
-		Error error  `json:"error, omitempty"`
+		Error error  `json:"error,omitempty"`
 	}
 	runs := new([]PipelineRun)
 
@@ -57,7 +58,7 @@ func (api *APIEndpoint) TriggerEvent(eventURI string, event *NormalizedEvent) er
 		"vars":     event.Variables,
 		"original": event.Original,
 	}).Debug("Sending normalized event payload")
-	resp, err := api.endpoint.New().Post(fmt.Sprint("triggers/", eventURI)).BodyJSON(event).ReceiveSuccess(&runs)
+	resp, err := api.endpoint.New().Post(fmt.Sprint("triggers/", url.QueryEscape(eventURI))).BodyJSON(event).ReceiveSuccess(&runs)
 	if err != nil {
 		log.WithError(err).Error("Failed to invoke Hermes POST /triggers/ API")
 		return err
