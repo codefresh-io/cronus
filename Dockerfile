@@ -14,7 +14,7 @@
 #
 # ----- Go Dev Image ------
 #
-FROM golang:1.9 AS godev
+FROM golang:1.10 AS godev
 
 # set working directory
 RUN mkdir -p /go/src/github.com/codefresh-io/cronus
