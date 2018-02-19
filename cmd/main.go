@@ -68,6 +68,12 @@ Copyright © Codefresh.io`, version.ASCIILogo)
 					Value:  "TOKEN",
 					EnvVar: "HERMES_TOKEN",
 				},
+				cli.StringFlag{
+					Name:   "store",
+					Usage:  "BoltDB storage file",
+					Value:  "/var/tmp/events.db",
+					EnvVar: "HERMES_TOKEN",
+				},
 				cli.IntFlag{
 					Name:  "port",
 					Usage: "TCP port for the dockerhub provider server",
@@ -164,11 +170,13 @@ func runServer(c *cli.Context) error {
 		hermesSvc = hermes.NewHermesEndpoint(hermesSvcName, c.String("token"))
 	}
 	// access boltdb
-	store, err := backend.NewBoltEventStore("/var/events.db")
+	store, err := backend.NewBoltEventStore(c.String("store"))
 	if err != nil {
+		log.WithError(err).Error("failed to start BoltDB")
 		return err
 	}
 	// start cron runner
+	log.Debug("starting cron job runner")
 	runner = cron.NewCronRunner(store, hermesSvc)
 	// create cronguru service for cron expression description
 	cronguru = cronexp.NewCronDescriptorEndpoint()

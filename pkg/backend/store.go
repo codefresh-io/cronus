@@ -20,6 +20,7 @@ var events = []byte("events")
 
 // NewBoltEventStore new BoldDB store
 func NewBoltEventStore(file string) (types.EventStore, error) {
+	log.WithField("store", file).Debug("starting BoltDB")
 	db, err := setupDB(file)
 	return &BoltEventStore{db}, err
 }

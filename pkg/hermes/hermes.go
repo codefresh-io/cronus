@@ -36,7 +36,7 @@ func NewNormalizedEvent() *NormalizedEvent {
 
 // NewHermesEndpoint create new Hermes API endpoint from url and API token
 func NewHermesEndpoint(url, token string) Service {
-	log.WithField("hermes url", url).Debug("Binding to Hermes service")
+	log.WithField("hermes url", url).Debug("binding to Hermes service")
 	endpoint := sling.New().Base(url).Set("Authorization", token)
 	return &APIEndpoint{endpoint}
 }
