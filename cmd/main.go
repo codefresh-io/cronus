@@ -146,10 +146,10 @@ func runServer(c *cli.Context) error {
 	router.GET("/cronus/event/:uri/:secret", gin.Logger(), getEventInfo)
 	router.GET("/event/:uri/:secret", gin.Logger(), getEventInfo)
 	// subscribe/unsubscribe route
-	router.POST("/cronus/event/:uri/:secret", gin.Logger(), subscribeToEvent)
-	router.POST("/event/:uri/:secret", gin.Logger(), subscribeToEvent)
-	router.DELETE("/cronus/event/:uri", gin.Logger(), unsubscribeFromEvent)
-	router.DELETE("/event/:uri", gin.Logger(), unsubscribeFromEvent)
+	router.POST("/cronus/event/:uri/:secret/*creds", gin.Logger(), subscribeToEvent)
+	router.POST("/event/:uri/:secret/*creds", gin.Logger(), subscribeToEvent)
+	router.DELETE("/cronus/event/:uri/*creds", gin.Logger(), unsubscribeFromEvent)
+	router.DELETE("/event/:uri/*creds", gin.Logger(), unsubscribeFromEvent)
 	// status routes
 	router.GET("/cronus/health", getHealth)
 	router.GET("/health", getHealth)
@@ -188,7 +188,8 @@ func runServer(c *cli.Context) error {
 }
 
 func getEventInfo(c *gin.Context) {
-	uri := c.Param("uri")
+	// special handling for cron '/' character - revert replacement
+	uri := strings.Replace(c.Param("uri"), "_slash_", "/", -1)
 	// get event
 	event, err := store.GetEvent(uri)
 	if err != nil {
@@ -199,7 +200,8 @@ func getEventInfo(c *gin.Context) {
 }
 
 func subscribeToEvent(c *gin.Context) {
-	uri := c.Param("uri")
+	// special handling for cron '/' character - revert replacement
+	uri := strings.Replace(c.Param("uri"), "_slash_", "/", -1)
 	secret := c.Param("secret")
 	event, err := types.ConstructEvent(uri, secret, cronguru)
 	if err != nil {
@@ -217,7 +219,8 @@ func subscribeToEvent(c *gin.Context) {
 }
 
 func unsubscribeFromEvent(c *gin.Context) {
-	uri := c.Param("uri")
+	// special handling for cron '/' character - revert replacement
+	uri := strings.Replace(c.Param("uri"), "_slash_", "/", -1)
 	// remove cron job
 	err := runner.RemoveCronJob(uri)
 	if err != nil {
