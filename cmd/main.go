@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 
@@ -171,7 +170,8 @@ func runServer(c *cli.Context) error {
 		hermesSvc = hermes.NewHermesEndpoint(hermesSvcName, c.String("token"))
 	}
 	// access boltdb
-	store, err := backend.NewBoltEventStore(c.String("store"))
+	var err error
+	store, err = backend.NewBoltEventStore(c.String("store"))
 	if err != nil {
 		log.WithError(err).Error("failed to start BoltDB")
 		return err
@@ -188,15 +188,14 @@ func runServer(c *cli.Context) error {
 	return router.Run(fmt.Sprintf(":%d", port))
 }
 
+func getParam(c *gin.Context, name string) string {
+	v := c.Param(name)
+	return strings.Replace(v, "_slash_", "/", -1)
+}
+
 func getEventInfo(c *gin.Context) {
-	log.WithField("uri (url-encoded)", c.Param("uri")).Debug("get event details")
-	// special handling for cron '/' character - revert replacement
-	uri := strings.Replace(c.Param("uri"), "_slash_", "/", -1)
-	uri, err := url.QueryUnescape(uri)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	uri := getParam(c, "uri")
+	log.WithField("uri", c.Param("uri")).Debug("get event details")
 	// get event
 	event, err := store.GetEvent(uri)
 	if err != nil {
@@ -207,14 +206,9 @@ func getEventInfo(c *gin.Context) {
 }
 
 func subscribeToEvent(c *gin.Context) {
-	log.WithField("uri (url-encoded)", c.Param("uri")).Debug("subscribe to event")
-	// special handling for cron '/' character - revert replacement
-	uri := strings.Replace(c.Param("uri"), "_slash_", "/", -1)
-	uri, err := url.QueryUnescape(uri)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	uri := getParam(c, "uri")
+	log.WithField("uri", uri).Debug("subscribe to event")
+
 	secret := c.Param("secret")
 	event, err := types.ConstructEvent(uri, secret, cronguru)
 	if err != nil {
@@ -232,16 +226,10 @@ func subscribeToEvent(c *gin.Context) {
 }
 
 func unsubscribeFromEvent(c *gin.Context) {
-	log.WithField("uri (url-encoded)", c.Param("uri")).Debug("unsubscribe from event")
-	// special handling for cron '/' character - revert replacement
-	uri := strings.Replace(c.Param("uri"), "_slash_", "/", -1)
-	uri, err := url.QueryUnescape(uri)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	uri := getParam(c, "uri")
+	log.WithField("uri (url-encoded)", uri).Debug("unsubscribe from event")
 	// remove cron job
-	err = runner.RemoveCronJob(uri)
+	err := runner.RemoveCronJob(uri)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -3,7 +3,6 @@ package hermes
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/dghubble/sling"
@@ -43,6 +42,10 @@ func NewHermesEndpoint(url, token string) Service {
 	return &APIEndpoint{endpoint}
 }
 
+func escapeSlash(val string) string {
+	return strings.Replace(val, "/", "_slash_", -1)
+}
+
 // TriggerEvent send normalized event to Hermes trigger-manager server
 func (api *APIEndpoint) TriggerEvent(eventURI string, event *NormalizedEvent) error {
 	log.WithField("event-uri", eventURI).Debug("Triggering event")
@@ -59,8 +62,7 @@ func (api *APIEndpoint) TriggerEvent(eventURI string, event *NormalizedEvent) er
 		"vars":     event.Variables,
 		"original": event.Original,
 	}).Debug("Sending normalized event payload")
-	uri := strings.Replace(eventURI, "/", "_slash_", -1)
-	resp, err := api.endpoint.New().Post(fmt.Sprint("triggers/", url.QueryEscape(uri))).BodyJSON(event).ReceiveSuccess(&runs)
+	resp, err := api.endpoint.New().Post(fmt.Sprint("triggers/", escapeSlash(eventURI))).BodyJSON(event).ReceiveSuccess(&runs)
 	if err != nil {
 		log.WithError(err).Error("Failed to invoke Hermes POST /triggers/ API")
 		return err

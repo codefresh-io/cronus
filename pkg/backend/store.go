@@ -47,6 +47,10 @@ func setupDB(file string) (*bolt.DB, error) {
 
 // StoreEvent store event record into BoltDB
 func (b *BoltEventStore) StoreEvent(event types.Event) error {
+	log.WithFields(log.Fields{
+		"expression": event.Expression,
+		"message":    event.Message,
+	}).Debug("storing new event")
 	return b.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(events)
 		v, _ := json.Marshal(event)
@@ -56,6 +60,7 @@ func (b *BoltEventStore) StoreEvent(event types.Event) error {
 
 // DeleteEvent delete event record from BoltDB
 func (b *BoltEventStore) DeleteEvent(uri string) error {
+	log.WithField("uri", uri).Debug("deleting event from store")
 	return b.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(events)
 		v := bucket.Get([]byte(uri))
@@ -69,6 +74,7 @@ func (b *BoltEventStore) DeleteEvent(uri string) error {
 // GetEvent get event record
 func (b *BoltEventStore) GetEvent(uri string) (*types.Event, error) {
 	var event types.Event
+	log.WithField("uri", uri).Debug("getting event from store")
 	err := b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(events)
 		v := bucket.Get([]byte(uri))
@@ -85,6 +91,7 @@ func (b *BoltEventStore) GetEvent(uri string) (*types.Event, error) {
 
 // GetAllEvents get all stored events
 func (b *BoltEventStore) GetAllEvents() ([]types.Event, error) {
+	log.Debug("getting all events from store")
 	all := make([]types.Event, 0)
 	b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(events)
