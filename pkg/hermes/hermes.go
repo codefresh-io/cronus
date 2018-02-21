@@ -54,24 +54,33 @@ func (api *APIEndpoint) TriggerEvent(eventURI string, event *NormalizedEvent) er
 		ID    string `json:"id"`
 		Error error  `json:"error,omitempty"`
 	}
+	// hermes error response
+	type HermesError struct {
+		Status  int    `json:"status"`
+		Message string `json:"message"`
+		Error   string `json:"error"`
+	}
+	// runs placeholder (on successful call)
 	runs := new([]PipelineRun)
+	// errors placeholder (for failures)
+	var hermesErr HermesError
 
 	// invoke hermes trigger
 	log.WithFields(log.Fields{
 		"secret":   event.Secret,
 		"vars":     event.Variables,
 		"original": event.Original,
-	}).Debug("Sending normalized event payload")
-	resp, err := api.endpoint.New().Post(fmt.Sprint("triggers/", escapeSlash(eventURI))).BodyJSON(event).ReceiveSuccess(&runs)
+	}).Debug("sending normalized event payload")
+	resp, err := api.endpoint.New().Post(fmt.Sprint("triggers/", escapeSlash(eventURI))).BodyJSON(event).Receive(&runs, &hermesErr)
 	if err != nil {
-		log.WithError(err).Error("Failed to invoke Hermes POST /triggers/ API")
+		log.WithError(err).WithField("api", "POST /triggers/").Error("failed to invoke Hermes REST API")
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		log.WithField("http status", resp.Status).Error("Herems POST /triggers/ API failed")
+		log.WithField("hermes error", hermesErr).WithField("api", "POST /triggers/").Error("failed to invoke Hermes REST API")
 		return fmt.Errorf("%s: error triggering event '%s'", resp.Status, eventURI)
 	}
-	log.WithField("event-uri", eventURI).Debug("Event triggered")
-	log.WithField("runs", runs).Debug("Running pipelines")
+	log.WithField("event-uri", eventURI).Debug("event successfully triggered")
+	log.WithField("runs", runs).Debug("running following pipelines")
 	return nil
 }
