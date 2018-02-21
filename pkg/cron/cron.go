@@ -15,7 +15,7 @@ type (
 	//CronJobEngine basic interface to underlying cron job engine
 	CronJobEngine interface {
 		Start()
-		AddFunc(spec string, cmd func()) (cron.EntryID, error)
+		AddJob(spec string, cmd cron.Job) (cron.EntryID, error)
 		Remove(id cron.EntryID)
 	}
 
@@ -30,9 +30,25 @@ type (
 	// JobManager job manager interface to add/remove running jobs
 	JobManager interface {
 		AddCronJob(e types.Event) error
-		RemoveCronJob(e types.Event) error
+		RemoveCronJob(uri string) error
+		TriggerEvent(e types.Event) error
+	}
+
+	// TriggerJob struct that keeps event and triggers cron job execution
+	TriggerJob struct {
+		manager JobManager
+		event   types.Event
 	}
 )
+
+// Run implements cron.Job interface
+func (job *TriggerJob) Run() {
+	log.Debug("running cron job")
+	err := job.manager.TriggerEvent(job.event)
+	if err != nil {
+		log.WithError(err).Error("failed to trigger event pipelines")
+	}
+}
 
 // NewCronRunner create new CRON runner with default cron job engine
 func NewCronRunner(store types.EventStore, svc hermes.Service) *Runner {
@@ -65,7 +81,7 @@ func (r *Runner) init() {
 			"message":     e.Message,
 			"description": e.Description,
 		}).Debug("creating a cron job based on event spec")
-		job, err := r.cron.AddFunc(e.Expression, func() { r.triggerEvent(e) })
+		job, err := r.cron.AddJob(e.Expression, &TriggerJob{manager: r, event: e})
 		if err != nil {
 			log.WithError(err).Warn("failed to create a new cron job")
 		}
@@ -76,8 +92,8 @@ func (r *Runner) init() {
 	r.cron.Start()
 }
 
-// trigger event
-func (r *Runner) triggerEvent(e types.Event) {
+// TriggerEvent trigger event
+func (r *Runner) TriggerEvent(e types.Event) error {
 	log.WithFields(log.Fields{
 		"cron":    e.Expression,
 		"message": e.Message,
@@ -94,10 +110,7 @@ func (r *Runner) triggerEvent(e types.Event) {
 
 	// attempt to invoke trigger
 	log.Debug("invoke hermes API to trigger event")
-	err := r.hermesSvc.TriggerEvent(types.GetURI(e), event)
-	if err != nil {
-		log.WithError(err).Error("failed to trigger event pipelines")
-	}
+	return r.hermesSvc.TriggerEvent(types.GetURI(e), event)
 }
 
 // AddCronJob add new CRON job
@@ -109,7 +122,7 @@ func (r *Runner) AddCronJob(e types.Event) error {
 		return errors.New("this cron job already exist")
 	}
 	// add cron job to job runner
-	job, err := r.cron.AddFunc(e.Expression, func() { r.triggerEvent(e) })
+	job, err := r.cron.AddJob(e.Expression, &TriggerJob{manager: r, event: e})
 	if err != nil {
 		return errors.New("failed to create a new cron job")
 	}

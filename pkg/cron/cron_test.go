@@ -56,7 +56,7 @@ func (m *CronJobEngineMock) Start() {
 	m.Called()
 }
 
-func (m *CronJobEngineMock) AddFunc(spec string, cmd func()) (cron.EntryID, error) {
+func (m *CronJobEngineMock) AddJob(spec string, cmd cron.Job) (cron.EntryID, error) {
 	args := m.Called(spec, cmd)
 	return cron.EntryID(args.Int(0)), args.Error(1)
 }
@@ -116,7 +116,7 @@ func TestNewCronRunnerFull(t *testing.T) {
 			storeMock.On("GetAllEvents").Return(tt.expected.events, nil)
 			// mock cron engine calls
 			for i, e := range tt.expected.events {
-				cronJobMock.On("AddFunc", e.Expression, mock.Anything).Return(i, nil)
+				cronJobMock.On("AddJob", e.Expression, mock.Anything).Return(i, nil)
 			}
 			// mock start
 			cronJobMock.On("Start")
@@ -181,7 +181,7 @@ func TestRunner_triggerEvent(t *testing.T) {
 				call.Return(nil)
 			}
 			// invoke
-			r.triggerEvent(tt.args.e)
+			r.TriggerEvent(tt.args.e)
 			// assert
 			hermesMock.AssertExpectations(t)
 		})
@@ -195,7 +195,7 @@ func TestRunner_AddCronJob(t *testing.T) {
 	tests := []struct {
 		name             string
 		args             args
-		wantAddFuncErr   bool
+		wantAddJobErr    bool
 		wantjobExistsErr bool
 		wantStoreError   bool
 	}{
@@ -227,7 +227,7 @@ func TestRunner_AddCronJob(t *testing.T) {
 			wantjobExistsErr: true,
 		},
 		{
-			name: "fail AddFunc",
+			name: "fail AddJob",
 			args: args{
 				e: types.Event{
 					Expression:  "5 4 * * *",
@@ -238,7 +238,7 @@ func TestRunner_AddCronJob(t *testing.T) {
 					Help:        "help",
 				},
 			},
-			wantAddFuncErr: true,
+			wantAddJobErr: true,
 		},
 		{
 			name: "fail StoreEvent",
@@ -271,8 +271,8 @@ func TestRunner_AddCronJob(t *testing.T) {
 				goto Invoke
 			}
 			// mock cron job
-			call = cronMock.On("AddFunc", tt.args.e.Expression, mock.Anything)
-			if tt.wantAddFuncErr {
+			call = cronMock.On("AddJob", tt.args.e.Expression, mock.Anything)
+			if tt.wantAddJobErr {
 				call.Return(0, errors.New("failed to create a new cron job"))
 				goto Invoke
 			} else {
@@ -288,8 +288,8 @@ func TestRunner_AddCronJob(t *testing.T) {
 			}
 			// invoke
 		Invoke:
-			if err := r.AddCronJob(tt.args.e); (err != nil) != (tt.wantAddFuncErr || tt.wantjobExistsErr || tt.wantStoreError) {
-				t.Errorf("Runner.AddCronJob() error = %v, wantErr %v", err, tt.wantAddFuncErr || tt.wantjobExistsErr || tt.wantStoreError)
+			if err := r.AddCronJob(tt.args.e); (err != nil) != (tt.wantAddJobErr || tt.wantjobExistsErr || tt.wantStoreError) {
+				t.Errorf("Runner.AddCronJob() error = %v, wantErr %v", err, tt.wantAddJobErr || tt.wantjobExistsErr || tt.wantStoreError)
 			}
 			// assert calls
 			storeMock.AssertExpectations(t)
