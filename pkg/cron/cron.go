@@ -60,6 +60,11 @@ func (r *Runner) init() {
 	}
 	// add already defined CRON jobs
 	for _, e := range events {
+		log.WithFields(log.Fields{
+			"expression":  e.Expression,
+			"message":     e.Message,
+			"description": e.Description,
+		}).Debug("creating a cron job based on event spec")
 		job, err := r.cron.AddFunc(e.Expression, func() { r.triggerEvent(e) })
 		if err != nil {
 			log.WithError(err).Warn("failed to create a new cron job")
