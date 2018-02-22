@@ -153,6 +153,20 @@ func TestRunner_triggerEvent(t *testing.T) {
 			},
 		},
 		{
+			name: "trigger event with account",
+			args: args{
+				e: types.Event{
+					Expression:  "5 4 * * *",
+					Message:     "test-message-1",
+					Account:     "cb1e73c5215b",
+					Secret:      "1234",
+					Description: "At 04:05",
+					Status:      "active",
+					Help:        "help",
+				},
+			},
+		},
+		{
 			name: "fail to trigger event",
 			args: args{
 				e: types.Event{
@@ -205,6 +219,20 @@ func TestRunner_AddCronJob(t *testing.T) {
 				e: types.Event{
 					Expression:  "5 4 * * *",
 					Message:     "test-message-1",
+					Secret:      "1234",
+					Description: "At 04:05",
+					Status:      "active",
+					Help:        "help",
+				},
+			},
+		},
+		{
+			name: "add cron event job with account",
+			args: args{
+				e: types.Event{
+					Expression:  "5 4 * * *",
+					Message:     "test-message-1",
+					Account:     "cb1e73c5215b",
 					Secret:      "1234",
 					Description: "At 04:05",
 					Status:      "active",

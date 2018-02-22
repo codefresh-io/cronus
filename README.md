@@ -29,10 +29,11 @@ POST ${HERMES_SERVICE}/trigger/${event}
 
 ### Cronus Event URI
 
-`cron:codefresh:{{cron-expression}}:{{message}}`
+`cron:codefresh:{{cron-expression}}:{{message}}[:{{account}}]`
 
 - `cron-expression '+'` - cron expression format (see below)
 - `message` - message to be send with each cron trigger event; should be short and alpha-numeric only (no space characters); `[a-z0-9]+` regex
+- `account` - optional Codefresh account short hash
 
 #### URL Encoding
 

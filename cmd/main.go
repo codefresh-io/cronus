@@ -87,7 +87,7 @@ Copyright © Codefresh.io`, version.ASCIILogo)
 			Usage: "start cronus server",
 			Description: `Run Cronus CRON Event Provider server. Cronus generates time-based events and sends normalized event payload to the Codefresh Hermes trigger manager service to invoke associated Codefresh pipelines.
 			
-		Event URI Pattern: cron:codefresh:{{cron-expression}}:{{message}}`,
+		Event URI Pattern: cron:codefresh:{{cron-expression}}:{{message}}[:{{account}}]`,
 			Action: runServer,
 		},
 	}
