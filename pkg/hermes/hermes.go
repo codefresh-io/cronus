@@ -71,13 +71,13 @@ func (api *APIEndpoint) TriggerEvent(eventURI string, event *NormalizedEvent) er
 		"vars":     event.Variables,
 		"original": event.Original,
 	}).Debug("sending normalized event payload")
-	resp, err := api.endpoint.New().Post(fmt.Sprint("triggers/", escapeSlash(eventURI))).BodyJSON(event).Receive(&runs, &hermesErr)
+	resp, err := api.endpoint.New().Post(fmt.Sprint("run/", escapeSlash(eventURI))).BodyJSON(event).Receive(&runs, &hermesErr)
 	if err != nil {
-		log.WithError(err).WithField("api", "POST /triggers/").Error("failed to invoke Hermes REST API")
+		log.WithError(err).WithField("api", "POST /run/").Error("failed to invoke Hermes REST API")
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		log.WithField("hermes error", hermesErr).WithField("api", "POST /triggers/").Error("failed to invoke Hermes REST API")
+		log.WithField("hermes error", hermesErr).WithField("api", "POST /run/").Error("failed to invoke Hermes REST API")
 		return fmt.Errorf("%s: error triggering event '%s'", resp.Status, eventURI)
 	}
 	log.WithField("event-uri", eventURI).Debug("event successfully triggered")
