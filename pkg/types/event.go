@@ -17,6 +17,8 @@ type (
 		Expression string `json:"expression"`
 		// event message
 		Message string `json:"message"`
+		// event account
+		Account string `json:"account"`
 		// event secret
 		Secret string `json:"secret"`
 		// Description human readable text
@@ -46,21 +48,25 @@ https://github.com/codefresh-io/cronus/docs/blob/master/expression.md`
 
 // GetURI get cron event unique key for store, in form {cron-expression}:{message}
 func GetURI(e Event) string {
-	return fmt.Sprintf("cron:codefresh:%s:%s", e.Expression, e.Message)
+	return fmt.Sprintf("cron:codefresh:%s:%s:%s", e.Expression, e.Message, e.Account)
 }
 
 // ConstructEvent convert construct event from store key
 func ConstructEvent(uri string, secret string, cronguru cronexp.Service) (*Event, error) {
+	log.WithField("uri", uri).Debug("constructing cron event object")
 	s := strings.Split(uri, ":")
-	if len(s) != 4 {
+	if len(s) != 5 {
+		log.Error("bad cron event uri: number of tokens")
 		return nil, errors.New("bad cron event uri")
 	}
 	if s[0] != "cron" || s[1] != "codefresh" {
-		return nil, errors.New("bad cron event uri, wrong type or kind")
+		log.Error("bad cron event uri: wrong type or kind")
+		return nil, errors.New("bad cron event uri: wrong type or kind")
 	}
 	// validate expression
 	expression := s[2]
 	if _, err := cron.Parse(expression); err != nil {
+		log.WithError(err).Error("error parcing cron expression")
 		return nil, err
 	}
 	// get message
@@ -71,6 +77,8 @@ func ConstructEvent(uri string, secret string, cronguru cronexp.Service) (*Event
 		log.WithError(err).Warn("failed to get cron expression description")
 		description = "failed to get cron description"
 	}
+	// get account
+	account := s[4]
 	// set status to active
 	status := "active"
 	// set help string
@@ -78,6 +86,7 @@ func ConstructEvent(uri string, secret string, cronguru cronexp.Service) (*Event
 	return &Event{
 		Expression:  expression,
 		Message:     message,
+		Account:     account,
 		Secret:      secret,
 		Description: description,
 		Status:      status,

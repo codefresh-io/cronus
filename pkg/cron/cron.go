@@ -79,6 +79,7 @@ func (r *Runner) init() {
 		log.WithFields(log.Fields{
 			"expression":  e.Expression,
 			"message":     e.Message,
+			"account":     e.Account,
 			"description": e.Description,
 		}).Debug("creating a cron job based on event spec")
 		job, err := r.cron.AddJob(e.Expression, &TriggerJob{manager: r, event: e})

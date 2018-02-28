@@ -34,7 +34,7 @@ func TestConstructEvent(t *testing.T) {
 		{
 			name: "construct valid event",
 			args: args{
-				uri:         "cron:codefresh:5 0 * 8 *:test-message",
+				uri:         "cron:codefresh:5 0 * 8 *:test-message:abcdef1234",
 				secret:      "1234",
 				expression:  "5 0 * 8 *",
 				description: "At 00:05 in August",
@@ -42,6 +42,7 @@ func TestConstructEvent(t *testing.T) {
 			want: &Event{
 				Expression:  "5 0 * 8 *",
 				Message:     "test-message",
+				Account:     "abcdef1234",
 				Secret:      "1234",
 				Description: "At 00:05 in August",
 				Status:      "active",
@@ -51,13 +52,14 @@ func TestConstructEvent(t *testing.T) {
 		{
 			name: "fail to describe event",
 			args: args{
-				uri:         "cron:codefresh:5 0 * 8 *:test-message",
+				uri:         "cron:codefresh:5 0 * 8 *:test-message:abcdef1234",
 				secret:      "1234",
 				expression:  "5 0 * 8 *",
 				description: "",
 			},
 			want: &Event{
 				Expression:  "5 0 * 8 *",
+				Account:     "abcdef1234",
 				Message:     "test-message",
 				Secret:      "1234",
 				Description: "failed to get cron description",
@@ -69,7 +71,7 @@ func TestConstructEvent(t *testing.T) {
 		{
 			name: "invalid cron expression",
 			args: args{
-				uri: "cron:codefresh:invalid-expression:test-message",
+				uri: "cron:codefresh:invalid-expression:test-message:abcdef1234",
 			},
 			wantErr: true,
 		},
