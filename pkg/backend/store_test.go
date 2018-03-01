@@ -95,11 +95,12 @@ func TestBoltEventStore_DeleteEvent(t *testing.T) {
 	}{
 		{
 			name: "delete existing event",
-			args: args{uri: "cron:codefresh:5 4 * * *:test-message-1"},
+			args: args{uri: "cron:codefresh:5 4 * * *:test-message-1:abcdef1234"},
 			events: []types.Event{
 				{
 					Expression:  "5 4 * * *",
 					Message:     "test-message-1",
+					Account:     "abcdef1234",
 					Secret:      "1234",
 					Description: "At 04:05",
 					Status:      "active",
@@ -108,6 +109,7 @@ func TestBoltEventStore_DeleteEvent(t *testing.T) {
 				{
 					Expression:  "5 0 * 8 *",
 					Message:     "test-message-2",
+					Account:     "abcdef1234",
 					Secret:      "1234",
 					Description: "At 00:05 in August",
 					Status:      "active",
@@ -118,12 +120,13 @@ func TestBoltEventStore_DeleteEvent(t *testing.T) {
 		},
 		{
 			name: "fail to delete non-existing event",
-			args: args{uri: "cron:codefresh:1 1 * * *:test-message"},
+			args: args{uri: "cron:codefresh:1 1 * * *:test-message:abcd1234"},
 			events: []types.Event{
 				{
 					Expression:  "5 4 * * *",
 					Message:     "test-message-1",
 					Secret:      "1234",
+					Account:     "abcd1234",
 					Description: "At 04:05",
 					Status:      "active",
 					Help:        "help",
@@ -132,6 +135,7 @@ func TestBoltEventStore_DeleteEvent(t *testing.T) {
 					Expression:  "5 0 * 8 *",
 					Message:     "test-message-2",
 					Secret:      "1234",
+					Account:     "abcd5678",
 					Description: "At 00:05 in August",
 					Status:      "active",
 					Help:        "help",
@@ -183,12 +187,13 @@ func TestBoltEventStore_GetEvent(t *testing.T) {
 	}{
 		{
 			name: "get existing event",
-			args: args{uri: "cron:codefresh:5 0 * 8 *:test-message-2"},
+			args: args{uri: "cron:codefresh:5 0 * 8 *:test-message-2:abcd1234"},
 			events: []types.Event{
 				{
 					Expression:  "5 4 * * *",
 					Message:     "test-message-1",
 					Secret:      "1234",
+					Account:     "abcd1234",
 					Description: "At 04:05",
 					Status:      "active",
 					Help:        "help",
@@ -197,6 +202,7 @@ func TestBoltEventStore_GetEvent(t *testing.T) {
 					Expression:  "5 0 * 8 *",
 					Message:     "test-message-2",
 					Secret:      "1234",
+					Account:     "abcd1234",
 					Description: "At 00:05 in August",
 					Status:      "active",
 					Help:        "help",
@@ -206,6 +212,7 @@ func TestBoltEventStore_GetEvent(t *testing.T) {
 				Expression:  "5 0 * 8 *",
 				Message:     "test-message-2",
 				Secret:      "1234",
+				Account:     "abcd1234",
 				Description: "At 00:05 in August",
 				Status:      "active",
 				Help:        "help",
@@ -213,12 +220,13 @@ func TestBoltEventStore_GetEvent(t *testing.T) {
 		},
 		{
 			name: "fail to get non-existing event",
-			args: args{uri: "cron:codefresh:1 1 * * *:test-message"},
+			args: args{uri: "cron:codefresh:1 1 * * *:test-message:abcd1234"},
 			events: []types.Event{
 				{
 					Expression:  "5 4 * * *",
 					Message:     "test-message-1",
 					Secret:      "1234",
+					Account:     "abcd1234",
 					Description: "At 04:05",
 					Status:      "active",
 					Help:        "help",
@@ -227,6 +235,7 @@ func TestBoltEventStore_GetEvent(t *testing.T) {
 					Expression:  "5 0 * 8 *",
 					Message:     "test-message-2",
 					Secret:      "1234",
+					Account:     "abcd5678",
 					Description: "At 00:05 in August",
 					Status:      "active",
 					Help:        "help",
