@@ -2,6 +2,7 @@ package hermes
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -72,15 +73,21 @@ func (api *APIEndpoint) TriggerEvent(eventURI string, event *NormalizedEvent) er
 		"original": event.Original,
 	}).Debug("sending normalized event payload")
 	resp, err := api.endpoint.New().Post(fmt.Sprint("run/", escapeSlash(eventURI))).BodyJSON(event).Receive(&runs, &hermesErr)
-	if err != nil {
+	// ignore EOF JSON parsing error
+	if err != nil && err != io.EOF {
 		log.WithError(err).WithField("api", "POST /run/").Error("failed to invoke Hermes REST API")
 		return err
 	}
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode >= 400 {
 		log.WithField("hermes error", hermesErr).WithField("api", "POST /run/").Error("failed to invoke Hermes REST API")
 		return fmt.Errorf("%s: error triggering event '%s'", resp.Status, eventURI)
 	}
-	log.WithField("event-uri", eventURI).Debug("event successfully triggered")
-	log.WithField("runs", runs).Debug("running following pipelines")
+	// if no triggers - no pipeline links
+	if resp.StatusCode == http.StatusNoContent {
+		log.WithField("event-uri", eventURI).Debug("no pipeline linked to the event")
+	} else {
+		log.WithField("event-uri", eventURI).Debug("event successfully triggered")
+		log.WithField("runs", runs).Debug("running following pipelines")
+	}
 	return nil
 }
