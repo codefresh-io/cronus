@@ -6,6 +6,8 @@ steps:
     image: alpine:3.7
     commands:
       - cf_export VERSION=$(cat VERSION)
+      # SHORT_VERSION is version without PATCH numver
+      - cf_export SHORT_VERSION=$(v=$(cat VERSION); echo ${v%.*})
 
   multistage_build:
     type: build
@@ -25,6 +27,15 @@ steps:
     type: push
     candidate: ${{multistage_build}}
     tag: ${{VERSION}}
+    when:
+      branch:
+        only:
+          - master
+  
+  dockerhub_push_short:
+    type: push
+    candidate: ${{multistage_build}}
+    tag: ${{SHORT_VERSION}}
     when:
       branch:
         only:
