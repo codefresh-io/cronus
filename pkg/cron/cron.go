@@ -25,6 +25,7 @@ type (
 		store     types.EventStore
 		cron      CronJobEngine
 		jobs      *sync.Map
+		limit     time.Duration
 	}
 
 	// JobManager job manager interface to add/remove running jobs
@@ -51,20 +52,37 @@ func (job *TriggerJob) Run() {
 }
 
 // NewCronRunner create new CRON runner with default cron job engine
-func NewCronRunner(store types.EventStore, svc hermes.Service) *Runner {
-	return NewCronRunnerFull(store, svc, cron.New())
+func NewCronRunner(store types.EventStore, svc hermes.Service, limit int64) *Runner {
+	return NewCronRunnerFull(store, svc, cron.New(), limit)
 }
 
 // NewCronRunnerFull create new CRON runner with pluggable cron job engine
-func NewCronRunnerFull(store types.EventStore, svc hermes.Service, cron CronJobEngine) *Runner {
+func NewCronRunnerFull(store types.EventStore, svc hermes.Service, cron CronJobEngine, limit int64) *Runner {
 	log.Debug("creating new cron runner")
 	runner := new(Runner)
 	runner.hermesSvc = svc
 	runner.store = store
 	runner.cron = cron
+	runner.limit = time.Duration(limit) * time.Minute
 	runner.jobs = new(sync.Map)
 	runner.init()
 	return runner
+}
+
+func checkValidInterval(expression string, limit time.Duration) (bool, time.Duration) {
+	// validate cron job
+	now := time.Now()
+	sch, err := cron.Parse(expression)
+	if err != nil {
+		return false, 0
+	}
+	next := sch.Next(now)
+	next2 := sch.Next(next)
+	interval := next2.Sub(next)
+	if interval <= limit {
+		return false, interval
+	}
+	return true, interval
 }
 
 func (r *Runner) init() {
@@ -82,6 +100,14 @@ func (r *Runner) init() {
 			"account":     e.Account,
 			"description": e.Description,
 		}).Debug("creating a cron job based on event spec")
+		if ok, interval := checkValidInterval(e.Expression, r.limit); !ok {
+			// skip
+			log.WithFields(log.Fields{
+				"interval": interval.String(),
+				"cron":     e.Expression,
+			}).Warning("too short interval")
+			continue
+		}
 		job, err := r.cron.AddJob(e.Expression, &TriggerJob{manager: r, event: e})
 		if err != nil {
 			log.WithError(err).Warn("failed to create a new cron job")
@@ -121,6 +147,11 @@ func (r *Runner) AddCronJob(e types.Event) error {
 	_, ok := r.jobs.Load(uri)
 	if ok {
 		return errors.New("this cron job already exist")
+	}
+	// check cron
+	if ok, _ := checkValidInterval(e.Expression, r.limit); !ok {
+		// skip short interval
+		return errors.New("invalid cron expression or too short interval")
 	}
 	// add cron job to job runner
 	job, err := r.cron.AddJob(e.Expression, &TriggerJob{manager: r, event: e})

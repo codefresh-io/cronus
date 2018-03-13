@@ -80,6 +80,11 @@ Copyright © Codefresh.io`, version.ASCIILogo)
 					Usage: "TCP port for the cronus provider server",
 					Value: 10002,
 				},
+				cli.Int64Flag{
+					Name:  "limit",
+					Usage: "minimal allowed cron interval (min)",
+					Value: 5,
+				},
 				cli.BoolFlag{
 					Name:  "dry-run",
 					Usage: "do not execute triggers, just log to console",
@@ -180,7 +185,7 @@ func runServer(c *cli.Context) error {
 	}
 	// start cron runner
 	log.Debug("starting cron job runner")
-	runner = cron.NewCronRunner(store, hermesSvc)
+	runner = cron.NewCronRunner(store, hermesSvc, c.Int64("limit"))
 	// create cronguru service for cron expression description
 	cronguru = cronexp.NewCronDescriptorEndpoint()
 

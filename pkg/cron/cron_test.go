@@ -2,8 +2,10 @@ package cron
 
 import (
 	"errors"
+	"io"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/codefresh-io/cronus/pkg/hermes"
 	"github.com/codefresh-io/cronus/pkg/types"
@@ -44,6 +46,11 @@ func (m *StoreMock) GetAllEvents() ([]types.Event, error) {
 
 func (m *StoreMock) GetDBStats() (int, error) {
 	args := m.Called()
+	return args.Int(0), args.Error(1)
+}
+
+func (m *StoreMock) BackupDB(w io.Writer) (int, error) {
+	args := m.Called(w)
 	return args.Int(0), args.Error(1)
 }
 
@@ -121,7 +128,7 @@ func TestNewCronRunnerFull(t *testing.T) {
 			// mock start
 			cronJobMock.On("Start")
 			// invoke
-			NewCronRunnerFull(storeMock, hermesMock, cronJobMock)
+			NewCronRunnerFull(storeMock, hermesMock, cronJobMock, 5)
 			// assert
 			storeMock.AssertExpectations(t)
 			cronJobMock.AssertExpectations(t)
@@ -384,6 +391,48 @@ func TestRunner_RemoveCronJob(t *testing.T) {
 			// assert
 			cronMock.AssertExpectations(t)
 			storeMock.AssertExpectations(t)
+		})
+	}
+}
+
+func Test_checkValidInterval(t *testing.T) {
+	type args struct {
+		expression string
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  bool
+		want1 time.Duration
+	}{
+		{
+			name:  "normal interval",
+			args:  args{"0 */10 * * * *"},
+			want:  true,
+			want1: 10 * time.Minute,
+		},
+		{
+			name:  "too small interval",
+			args:  args{"*/5 * * * * *"},
+			want:  false,
+			want1: 5 * time.Second,
+		},
+		{
+			name:  "invalid interval",
+			args:  args{"wrong"},
+			want:  false,
+			want1: 0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := checkValidInterval(tt.args.expression, 5*time.Minute)
+			if got != tt.want {
+				t.Errorf("checkValidInterval() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("checkValidInterval() got1 = %v, want %v", got1, tt.want1)
+			}
 		})
 	}
 }
