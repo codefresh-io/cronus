@@ -3,6 +3,7 @@ package types
 import (
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/codefresh-io/cronus/pkg/cronexp"
@@ -36,6 +37,7 @@ type (
 		GetEvent(uri string) (*Event, error)
 		GetAllEvents() ([]Event, error)
 		GetDBStats() (int, error)
+		BackupDB(w io.Writer) (int, error)
 	}
 )
 

@@ -3,6 +3,7 @@ package backend
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"github.com/boltdb/bolt"
 	"github.com/codefresh-io/cronus/pkg/types"
@@ -43,6 +44,18 @@ func setupDB(file string) (*bolt.DB, error) {
 
 	log.Debug("setup db done")
 	return db, nil
+}
+
+// BackupDB backup BoltDB database
+func (b *BoltEventStore) BackupDB(w io.Writer) (int, error) {
+	log.Debug("database backup")
+	var size int
+	err := b.db.View(func(tx *bolt.Tx) error {
+		size = int(tx.Size())
+		_, err := tx.WriteTo(w)
+		return err
+	})
+	return size, err
 }
 
 // StoreEvent store event record into BoltDB

@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -8,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/codefresh-io/cronus/pkg/types"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -337,6 +337,76 @@ func TestBoltEventStore_GetAllEvents(t *testing.T) {
 				return
 			}
 			assert.ElementsMatch(t, got, tt.want, "unexpected result")
+		})
+	}
+}
+
+func TestBoltEventStore_BackupDB(t *testing.T) {
+	tests := []struct {
+		name    string
+		events  []types.Event
+		want    int
+		wantErr bool
+	}{
+		{
+			name: "get all existing event",
+			events: []types.Event{
+				{
+					Expression:  "5 4 * * *",
+					Message:     "test-message-1",
+					Secret:      "1234",
+					Description: "At 04:05",
+					Status:      "active",
+					Help:        "help",
+				},
+				{
+					Expression:  "5 0 * 8 *",
+					Message:     "test-message-2",
+					Secret:      "1234",
+					Description: "At 00:05 in August",
+					Status:      "active",
+					Help:        "help",
+				},
+			},
+			want: 24576,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// setup and tear down the test case
+			teardownTestCase, eventsDB := setupTestCase(t)
+			defer teardownTestCase(t)
+			b, err := NewBoltEventStore(eventsDB)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// create events
+			for _, e := range tt.events {
+				b.StoreEvent(e)
+			}
+			// prepare buffer
+			w := &bytes.Buffer{}
+			got, err := b.BackupDB(w)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("BoltEventStore.BackupDB() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("BoltEventStore.BackupDB() = %v, want %v", got, tt.want)
+			}
+			// try to restore
+			// write buffer to file
+			backupFile := eventsDB + ".bak"
+			err = ioutil.WriteFile(backupFile, w.Bytes(), 0600)
+			if err != nil {
+				t.Fatal(err)
+			}
+			restore, err := NewBoltEventStore(backupFile)
+			if err != nil {
+				t.Fatal(err)
+			}
+			restored, err := restore.GetAllEvents()
+			assert.ElementsMatch(t, restored, tt.events, "failed to restore events")
 		})
 	}
 }

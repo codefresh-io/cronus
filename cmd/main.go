@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/codefresh-io/cronus/pkg/backend"
@@ -155,6 +156,7 @@ func runServer(c *cli.Context) error {
 	router.GET("/health", getHealth)
 	router.GET("/cronus/version", getVersion)
 	router.GET("/version", getVersion)
+	router.GET("/backup", backupDB)
 	router.GET("/", getVersion)
 
 	// access hermes
@@ -243,4 +245,17 @@ func getHealth(c *gin.Context) {
 
 func getVersion(c *gin.Context) {
 	c.String(http.StatusOK, version.HumanVersion)
+}
+
+func backupDB(c *gin.Context) {
+	size, err := store.BackupDB(c.Writer)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	// set return header
+	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Content-Disposition", `attachment; filename="my.db"`)
+	c.Header("Content-Length", strconv.Itoa(size))
+	c.Status(http.StatusOK)
 }
