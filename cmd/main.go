@@ -76,14 +76,16 @@ Copyright © Codefresh.io`, version.ASCIILogo)
 					EnvVar: "STORE_FILE",
 				},
 				cli.IntFlag{
-					Name:  "port",
-					Usage: "TCP port for the cronus provider server",
-					Value: 10002,
+					Name:   "port",
+					Usage:  "TCP port for the cronus provider server",
+					EnvVar: "PORT",
+					Value:  10002,
 				},
 				cli.Int64Flag{
-					Name:  "limit",
-					Usage: "minimal allowed cron interval (min)",
-					Value: 5,
+					Name:   "limit",
+					Usage:  "minimal allowed cron interval (min)",
+					EnvVar: "LIMIT",
+					Value:  5,
 				},
 				cli.BoolFlag{
 					Name:  "dry-run",
