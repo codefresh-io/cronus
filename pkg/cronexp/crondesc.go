@@ -57,7 +57,8 @@ func (api *APIEndpoint) DescribeCronExpression(expression string) (string, error
 	}
 	// descriptor service returns 200 even for error and error details in string
 	if strings.HasPrefix(res.Description, "Error:") {
-		return "", fmt.Errorf("error describing cron expression '%s'; ", res.Description)
+		log.Errorf("error describing cron expression '%s'", res.Description)
+		return "", fmt.Errorf("error describing cron expression '%s'", res.Description)
 	}
 
 	log.WithField("description", res.Description).Debug("successfully described cron expression")

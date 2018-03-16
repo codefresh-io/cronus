@@ -29,17 +29,20 @@ func NewBoltEventStore(file string) (types.EventStore, error) {
 func setupDB(file string) (*bolt.DB, error) {
 	db, err := bolt.Open(file, 0600, nil)
 	if err != nil {
-		return nil, fmt.Errorf("could not open db, %v", err)
+		log.WithError(err).Error("failed to open file")
+		return nil, fmt.Errorf("failed to open db, %v", err)
 	}
 	err = db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(events)
 		if err != nil {
-			return fmt.Errorf("could not create events bucket: %v", err)
+			log.WithError(err).Error("failed to create events bucket")
+			return fmt.Errorf("failed to create events bucket: %v", err)
 		}
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("could not set up buckets, %v", err)
+		log.WithError(err).Error("failed to setup db")
+		return nil, fmt.Errorf("failed to set up db, %v", err)
 	}
 
 	log.Debug("setup db done")
@@ -55,6 +58,9 @@ func (b *BoltEventStore) BackupDB(w io.Writer) (int, error) {
 		_, err := tx.WriteTo(w)
 		return err
 	})
+	if err != nil {
+		log.WithError(err).Error("failed to backup db")
+	}
 	return size, err
 }
 
@@ -78,6 +84,7 @@ func (b *BoltEventStore) DeleteEvent(uri string) error {
 		bucket := tx.Bucket(events)
 		v := bucket.Get([]byte(uri))
 		if v == nil {
+			log.WithField("uri", uri).Error("event not found")
 			return types.ErrEventNotFound
 		}
 		return bucket.Delete([]byte(uri))
@@ -92,11 +99,13 @@ func (b *BoltEventStore) GetEvent(uri string) (*types.Event, error) {
 		bucket := tx.Bucket(events)
 		v := bucket.Get([]byte(uri))
 		if v == nil {
+			log.WithField("uri", uri).Error("event not found")
 			return types.ErrEventNotFound
 		}
 		return json.Unmarshal(v, &event)
 	})
 	if err != nil {
+		log.WithError(err).Error("failed to get event")
 		return nil, err
 	}
 	return &event, nil
@@ -112,6 +121,7 @@ func (b *BoltEventStore) GetAllEvents() ([]types.Event, error) {
 			var event types.Event
 			err := json.Unmarshal(v, &event)
 			if err != nil {
+				log.WithError(err).Error("failed to parse JSON")
 				return err
 			}
 			all = append(all, event)
@@ -131,5 +141,8 @@ func (b *BoltEventStore) GetDBStats() (int, error) {
 		records = stats.KeyN
 		return nil
 	})
+	if err != nil {
+		log.WithError(err).Error("failed to get db stats")
+	}
 	return records, err
 }

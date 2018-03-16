@@ -83,9 +83,9 @@ Copyright © Codefresh.io`, version.ASCIILogo)
 				},
 				cli.Int64Flag{
 					Name:   "limit",
-					Usage:  "minimal allowed cron interval (min)",
+					Usage:  "minimal allowed cron interval (seconds)",
 					EnvVar: "LIMIT",
-					Value:  5,
+					Value:  60,
 				},
 				cli.BoolFlag{
 					Name:  "dry-run",
@@ -180,6 +180,7 @@ func runServer(c *cli.Context) error {
 	}
 	// access boltdb
 	var err error
+	log.WithField("store", store).Debug("initializing BoltDB")
 	store, err = backend.NewBoltEventStore(c.String("store"))
 	if err != nil {
 		log.WithError(err).Error("failed to start BoltDB")
@@ -208,6 +209,7 @@ func getEventInfo(c *gin.Context) {
 	// get event
 	event, err := store.GetEvent(uri)
 	if err != nil {
+		log.WithError(err).Error("failed to get event info")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -221,12 +223,14 @@ func subscribeToEvent(c *gin.Context) {
 	secret := c.Param("secret")
 	event, err := types.ConstructEvent(uri, secret, cronguru)
 	if err != nil {
+		log.WithError(err).Error("failed to construct event URI")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	// add cron job
 	err = runner.AddCronJob(*event)
 	if err != nil {
+		log.WithError(err).Error("failed to add cron job")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -240,6 +244,7 @@ func unsubscribeFromEvent(c *gin.Context) {
 	// remove cron job
 	err := runner.RemoveCronJob(uri)
 	if err != nil {
+		log.WithError(err).Error("failed to remove cron job")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -257,6 +262,7 @@ func getVersion(c *gin.Context) {
 func backupDB(c *gin.Context) {
 	size, err := store.BackupDB(c.Writer)
 	if err != nil {
+		log.WithError(err).Error("failed to backup BoltDB")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

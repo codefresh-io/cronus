@@ -74,12 +74,17 @@ func checkValidInterval(expression string, limit time.Duration) (bool, time.Dura
 	now := time.Now()
 	sch, err := cron.Parse(expression)
 	if err != nil {
+		log.WithError(err).WithField("cron", expression).Error("failed to parse cron expression")
 		return false, 0
 	}
 	next := sch.Next(now)
 	next2 := sch.Next(next)
 	interval := next2.Sub(next)
 	if interval <= limit {
+		log.WithFields(log.Fields{
+			"interval": interval,
+			"limit":    limit,
+		}).Warnf("interval is shorter than allowed limit of %v", limit)
 		return false, interval
 	}
 	return true, interval
@@ -91,6 +96,7 @@ func (r *Runner) init() {
 	events, err := r.store.GetAllEvents()
 	if err != nil {
 		log.WithError(err).Error("load existing cron job events")
+		return
 	}
 	// add already defined CRON jobs
 	for _, e := range events {
@@ -105,7 +111,7 @@ func (r *Runner) init() {
 			log.WithFields(log.Fields{
 				"interval": interval.String(),
 				"cron":     e.Expression,
-			}).Warning("too short interval")
+			}).Warn("too short interval")
 			continue
 		}
 		job, err := r.cron.AddJob(e.Expression, &TriggerJob{manager: r, event: e})
@@ -146,22 +152,26 @@ func (r *Runner) AddCronJob(e types.Event) error {
 	uri := types.GetURI(e)
 	_, ok := r.jobs.Load(uri)
 	if ok {
+		log.Warn("trying to add already existing cron job")
 		return errors.New("this cron job already exist")
 	}
 	// check cron
 	if ok, _ := checkValidInterval(e.Expression, r.limit); !ok {
 		// skip short interval
+		log.Error("invalid interval")
 		return errors.New("invalid cron expression or too short interval")
 	}
 	// add cron job to job runner
 	job, err := r.cron.AddJob(e.Expression, &TriggerJob{manager: r, event: e})
 	if err != nil {
+		log.WithError(err).Error("failed to create a new cron job")
 		return errors.New("failed to create a new cron job")
 	}
 	// store cron event into persistent store
 	err = r.store.StoreEvent(e)
 	if err != nil {
 		// remove cron job from job runner
+		log.WithError(err).Error("failed to store event")
 		r.cron.Remove(job)
 		return err
 	}
@@ -175,6 +185,7 @@ func (r *Runner) RemoveCronJob(uri string) error {
 	log.WithField("event-uri", uri).Debug("removing cron job")
 	job, ok := r.jobs.Load(uri)
 	if !ok {
+		log.Error("cron job not found")
 		return errors.New("cron job not found")
 	}
 	// remove cron job from job runner
