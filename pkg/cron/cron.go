@@ -63,7 +63,7 @@ func NewCronRunnerFull(store types.EventStore, svc hermes.Service, cron CronJobE
 	runner.hermesSvc = svc
 	runner.store = store
 	runner.cron = cron
-	runner.limit = time.Duration(limit) * time.Minute
+	runner.limit = time.Duration(limit) * time.Second
 	runner.jobs = new(sync.Map)
 	runner.init()
 	return runner
