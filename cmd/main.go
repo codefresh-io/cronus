@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -200,7 +201,14 @@ func runServer(c *cli.Context) error {
 
 func getParam(c *gin.Context, name string) string {
 	v := c.Param(name)
-	return strings.Replace(v, "_slash_", "/", -1)
+	v, err := url.QueryUnescape(v)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"name":  name,
+			"value": v,
+		}).WithError(err).Error("failed to URL decode value")
+	}
+	return v
 }
 
 func getEventInfo(c *gin.Context) {
