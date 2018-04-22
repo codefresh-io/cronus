@@ -80,7 +80,7 @@ func checkValidInterval(expression string, limit time.Duration) (bool, time.Dura
 	next := sch.Next(now)
 	next2 := sch.Next(next)
 	interval := next2.Sub(next)
-	if interval <= limit {
+	if interval < limit {
 		log.WithFields(log.Fields{
 			"interval": interval,
 			"limit":    limit,

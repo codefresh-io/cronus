@@ -396,6 +396,10 @@ func TestRunner_RemoveCronJob(t *testing.T) {
 }
 
 func Test_checkValidInterval(t *testing.T) {
+	const (
+		limit    = 5 * time.Minute
+		limitExp = "0 */5 * * * *"
+	)
 	type args struct {
 		expression string
 	}
@@ -412,6 +416,12 @@ func Test_checkValidInterval(t *testing.T) {
 			want1: 10 * time.Minute,
 		},
 		{
+			name:  "limit interval",
+			args:  args{limitExp},
+			want:  true,
+			want1: limit,
+		},
+		{
 			name:  "too small interval",
 			args:  args{"*/5 * * * * *"},
 			want:  false,
@@ -426,7 +436,7 @@ func Test_checkValidInterval(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := checkValidInterval(tt.args.expression, 5*time.Minute)
+			got, got1 := checkValidInterval(tt.args.expression, limit)
 			if got != tt.want {
 				t.Errorf("checkValidInterval() got = %v, want %v", got, tt.want)
 			}
