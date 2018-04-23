@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/dghubble/sling"
 	log "github.com/sirupsen/logrus"
