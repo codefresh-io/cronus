@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -192,15 +193,25 @@ func runServer(c *cli.Context) error {
 	// create cronguru service for cron expression description
 	cronguru = cronexp.NewCronDescriptorEndpoint()
 
-	// run server
+	// set server port
 	port := c.Int("port")
 	log.WithField("port", port).Debug("starting cronus server")
+	// use RawPath: the url.RawPath will be used to find parameters
+	router.UseRawPath = true
+	// run server
 	return router.Run(fmt.Sprintf(":%d", port))
 }
 
 func getParam(c *gin.Context, name string) string {
 	v := c.Param(name)
-	return strings.Replace(v, "_slash_", "/", -1)
+	v, err := url.PathUnescape(v)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"name":  name,
+			"value": v,
+		}).WithError(err).Error("failed to URL decode value")
+	}
+	return v
 }
 
 func getEventInfo(c *gin.Context) {
