@@ -201,7 +201,7 @@ func runServer(c *cli.Context) error {
 
 func getParam(c *gin.Context, name string) string {
 	v := c.Param(name)
-	v, err := url.QueryUnescape(v)
+	v, err := url.PathUnescape(v)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"name":  name,
