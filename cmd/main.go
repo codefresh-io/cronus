@@ -193,9 +193,12 @@ func runServer(c *cli.Context) error {
 	// create cronguru service for cron expression description
 	cronguru = cronexp.NewCronDescriptorEndpoint()
 
-	// run server
+	// set server port
 	port := c.Int("port")
 	log.WithField("port", port).Debug("starting cronus server")
+	// use RawPath: the url.RawPath will be used to find parameters
+	router.UseRawPath = true
+	// run server
 	return router.Run(fmt.Sprintf(":%d", port))
 }
 
