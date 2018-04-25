@@ -164,6 +164,8 @@ func runServer(c *cli.Context) error {
 	router.GET("/health", getHealth)
 	router.GET("/cronus/version", getVersion)
 	router.GET("/version", getVersion)
+	router.GET("/cronus/ping", ping)
+	router.GET("/ping", ping)
 	router.GET("/backup", backupDB)
 	router.GET("/", getVersion)
 
@@ -268,6 +270,11 @@ func getHealth(c *gin.Context) {
 
 func getVersion(c *gin.Context) {
 	c.String(http.StatusOK, version.HumanVersion)
+}
+
+// Ping return PONG with OK
+func ping(c *gin.Context) {
+	c.String(http.StatusOK, "PONG")
 }
 
 func backupDB(c *gin.Context) {
