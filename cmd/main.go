@@ -14,6 +14,7 @@ import (
 	"github.com/codefresh-io/cronus/pkg/hermes"
 	"github.com/codefresh-io/cronus/pkg/types"
 	"github.com/codefresh-io/cronus/pkg/version"
+	"github.com/codefresh-io/go-infra/pkg/logger"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -109,7 +110,7 @@ Copyright © Codefresh.io`, version.ASCIILogo)
 		},
 		cli.BoolFlag{
 			Name:  "json",
-			Usage: "produce log in JSON format: Logstash and Splunk friendly",
+			Usage: "produce log in Codefresh JSON format",
 		},
 	}
 
@@ -137,7 +138,7 @@ func before(c *cli.Context) error {
 	}
 	// set log formatter to JSON
 	if c.GlobalBool("json") {
-		log.SetFormatter(&log.JSONFormatter{})
+		log.SetFormatter(&logger.CFFormatter{})
 	}
 
 	return nil

@@ -8,6 +8,12 @@
   version = "v1.3.1"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/codefresh-io/go-infra"
+  packages = ["pkg/logger"]
+  revision = "5d0060ced546fb745bdc8a47b4777f5cc313c3c5"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -112,6 +118,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ef33ef2af32c3235c5c20e1c4033d292abbc959840f0985cac6154a8ab868b04"
+  inputs-digest = "6389b0de3465fe6a16586665ca02f6a46c59b083bd7aa5f03dcc650c02791c6a"
   solver-name = "gps-cdcl"
   solver-version = 1
