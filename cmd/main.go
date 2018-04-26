@@ -141,6 +141,13 @@ func before(c *cli.Context) error {
 	if c.GlobalBool("json") {
 		log.SetFormatter(&logger.CFFormatter{})
 	}
+	// trace function calls
+	traceHook := logger.NewHook()
+	traceHook.Prefix = "codefresh:hermes:"
+	traceHook.AppName = "hermes"
+	traceHook.FunctionField = logger.FieldNamespace
+	traceHook.AppField = logger.FieldService
+	log.AddHook(traceHook)
 
 	return nil
 }
