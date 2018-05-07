@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/codefresh-io/go-infra"
   packages = ["pkg/logger"]
-  revision = "5d0060ced546fb745bdc8a47b4777f5cc313c3c5"
+  revision = "2bef952965adbd13f6b2590b7e80191cd9e7146e"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -54,6 +54,12 @@
   packages = ["."]
   revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
   version = "v0.0.3"
+
+[[projects]]
+  name = "github.com/newrelic/go-agent"
+  packages = [".","internal","internal/cat","internal/jsonx","internal/logger","internal/sysinfo","internal/utilization"]
+  revision = "f5bce3387232559bcbe6a5f8227c4bf508dac1ba"
+  version = "v1.11.0"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
