@@ -46,7 +46,7 @@ var ErrEventNotFound = errors.New("cron event not found")
 
 var commonHelp = `Cronus cron event provider triggers Codefresh pipeline execution, following cron expression.
 Supported cron expression syntax:
-https://github.com/codefresh-io/cronus/docs/blob/master/expression.md`
+https://github.com/codefresh-io/cronus/blob/master/docs/expression.md`
 
 // GetURI get cron event unique key for store, in form {cron-expression}:{message}
 func GetURI(e Event) string {
