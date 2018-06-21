@@ -164,10 +164,10 @@ func runServer(c *cli.Context) error {
 	router.GET("/cronus/event/:uri/:secret", gin.Logger(), getEventInfo)
 	router.GET("/event/:uri/:secret", gin.Logger(), getEventInfo)
 	// subscribe/unsubscribe route
-	router.POST("/cronus/event/:uri/:secret/*creds", gin.Logger(), subscribeToEvent)
-	router.POST("/event/:uri/:secret/*creds", gin.Logger(), subscribeToEvent)
-	router.DELETE("/cronus/event/:uri/*creds", gin.Logger(), unsubscribeFromEvent)
-	router.DELETE("/event/:uri/*creds", gin.Logger(), unsubscribeFromEvent)
+	router.POST("/cronus/event/:uri", gin.Logger(), subscribeToEvent)
+	router.POST("/event/:uri", gin.Logger(), subscribeToEvent)
+	router.DELETE("/cronus/event/:uri", gin.Logger(), unsubscribeFromEvent)
+	router.DELETE("/event/:uri", gin.Logger(), unsubscribeFromEvent)
 	// status routes
 	router.GET("/cronus/health", getHealth)
 	router.GET("/health", getHealth)
@@ -241,9 +241,18 @@ func getEventInfo(c *gin.Context) {
 func subscribeToEvent(c *gin.Context) {
 	uri := getParam(c, "uri")
 	log.WithField("uri", uri).Debug("subscribe to event")
-
-	secret := c.Param("secret")
-	event, err := types.ConstructEvent(uri, secret, cronguru)
+	// get subset of subscribe
+	type subscribeReq struct {
+		Type   string `json:"type"`
+		Kind   string `json:"kind"`
+		Secret string `json:"secret,omitempty"`
+	}
+	var req subscribeReq
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error in request JSON body": err.Error()})
+		return
+	}
+	event, err := types.ConstructEvent(uri, req.Secret, cronguru)
 	if err != nil {
 		log.WithError(err).Error("failed to construct event URI")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
