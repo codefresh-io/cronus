@@ -59,7 +59,7 @@ FROM alpine:3.9
 
 ENV GIN_MODE=release
 
-RUN apk add --no-cache ca-certificates
+RUN apk update && apk add --no-cache ca-certificates && apk upgrade
 
 COPY --from=builder /go/src/github.com/codefresh-io/cronus/.bin/cronus /usr/local/bin/cronus
 
