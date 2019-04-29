@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "cronus.fullname" . }}
+  labels:
+    app: {{ template "cronus.name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    type: {{ .Values.event.type }}
+    kind: {{ .Values.event.kind }}
+data:
+  # always regenerate random token - leads to shanged SHA256 sum and thus Deployment recreate
+  random_token: {{ randAlphaNum 10 | b64enc | quote }}
+  # cron trigger configuration
+  config.json: |
+    {
+      "type": "cron",
+      "kind": "codefresh",
+      "service-url": "http://{{ template "cronus.fullname" . }}:{{ .Values.service.externalPort }}",
+      "uri-template": "cron:codefresh:{{"{{"}}expression{{"}}"}}:{{"{{"}}message{{"}}"}}",
+      "uri-regex": "^cron:codefresh:@yearly|@annually|@montly|@weekly|@daily|@midnight|@hourly|([a-zA-Z0-9*/,-?]+\\s?){6,7}:[a-zA-Z0-9_+\\s-#?.:]{2,128}$",
+      "help-url": "https://codefresh.io/docs/docs/pipeline-triggers/configure-dockerhub-trigger/",
+      "config": [{
+              "name": "expression",
+              "type": "cron",
+              "help": "6 terms cron expression",
+              "validator": "^@yearly|@annually|@montly|@weekly|@daily|@midnight|@hourly|([a-zA-Z0-9*/,-?]+\\s?){6,7}$",
+              "required": true
+          },
+          {
+              "name": "message",
+              "type": "string",
+              "help": "text to send with each trigger",
+              "validator": "^[a-zA-Z0-9_+\\s-#?.:]{2,128}$",
+              "required": true
+          }
+      ]
+    }
