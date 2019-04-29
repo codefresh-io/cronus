@@ -1,0 +1,48 @@
+global:
+  codefresh: codefresh
+# Default values for cronus.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+image:
+  repository: r.cfcr.io/codefresh-inc/codefresh/cronus
+  pullPolicy: Always
+imageTag: 0.3.0
+
+# set log level
+logLevel: debug
+
+# true - set log format to Codefresh JSON
+logJSON: false
+
+# set event handler type and kind
+event:
+  type: cron
+  kind: codefresh
+
+# Hermes Service name - deafult to "<release>-hermes"
+# hermesService: "..."
+  
+service:
+  name: cronus
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 8080
+
+# BoltDb store size
+store:
+  size: 1Gi
+
+#cronus backup cronjob
+cronjob:
+  image: codefresh/cronus-backup
+  tag: 0.1.3
+
+backup:
+  enabled: false
+  env: staging
+
+# Storage Class name if not default
+#storageClass: {}
+
+## Use existing volume claim name
+# pvcName:

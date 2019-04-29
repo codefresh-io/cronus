@@ -1,0 +1,57 @@
+{{- if .Values.backup.enabled }}
+---
+apiVersion: batch/v1beta1	
+kind: CronJob	
+metadata:	
+  name: {{ template "cronus.fullname" . }}-backup	
+  labels:	
+    app: {{ template "cronus.name" . }}	
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}	
+    release: {{ .Release.Name }}	
+    heritage: {{ .Release.Service }}	
+spec:	
+  schedule: "0 * * * *"	
+  jobTemplate:	
+    spec:	
+      template:	
+        spec:	
+          affinity:	
+{{ toYaml ( default .Values.global.affinity .Values.cronjob.affinity ) | indent 12 }}	
+          containers:	
+          - env:	
+            - name: APP_ENVIRONMENT	
+              value:	{{ .Values.backup.env }}
+            - name: CRONUS_SERVICE
+              value: {{ template "cronus.fullname" . }}:{{ .Values.service.externalPort }}
+            - name: S3_CRONUS_BACKUP_URL
+              valueFrom:	
+                secretKeyRef:	
+                  key: s3-url	
+                  name: {{ template "cronus.fullname" . }}-backup
+            - name: SLACK_CHANNEL	
+              valueFrom:	
+                secretKeyRef:	
+                  key: slack-channel	
+                  name: {{ template "cronus.fullname" . }}-backup
+            - name: SLACK_WEBHOOK_URL	
+              valueFrom:	
+                secretKeyRef:	
+                  key: slack-url	
+                  name: {{ template "cronus.fullname" . }}-backup
+            - name: AWS_ACCESS_KEY_ID	
+              valueFrom:	
+                secretKeyRef:	
+                  key: aws-access-key-id	
+                  name: {{ template "cronus.fullname" . }}-backup
+            - name: AWS_SECRET_ACCESS_KEY	
+              valueFrom:	
+                secretKeyRef:	
+                  key: aws-secret-access-key	
+                  name: {{ template "cronus.fullname" . }}-backup
+            image: {{ .Values.cronjob.image }}:{{ .Values.cronjob.tag }}	
+            imagePullPolicy: Always	
+            name: {{ .Chart.Name }}-backup	
+          imagePullSecrets:	
+          - name: docker-registry	
+          restartPolicy: OnFailure
+{{- end }}
