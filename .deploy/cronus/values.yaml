@@ -4,7 +4,7 @@ global:
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 image:
-  repository: codefresh/cronus
+  name: codefresh/cronus
   dockerRegistry: r.cfcr.io/codefresh-inc/
   pullPolicy: Always
 imageTag: 0.3.0
