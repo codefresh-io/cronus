@@ -1,0 +1,28 @@
+{{- if $.Values.global.istio.enabled }}
+  {{ $subsets := list }}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "cronus.fullname" . }}
+spec:
+  host: {{ template "cronus.fqdn" . }}
+  subsets:
+  - name: base
+    labels:
+      version: base
+  {{- range $key,$value := .Values.global.istio.extraDeployments -}}
+    {{- range $host, $apps := $value -}}
+      {{- range $name, $a := $apps -}}
+        {{- if (eq $name "cronus") -}}
+          {{ $subsets = append $subsets (printf "%s" $host) }}
+        {{- end -}}
+      {{ end -}}
+    {{ end -}}
+  {{ end -}}
+  {{- range $s := $subsets | uniq }}
+  - name: {{ $s | replace "." "-" }}
+    labels:
+      version: {{ $s | replace "." "-" }}
+  {{- end -}}
+{{ end }}
+
