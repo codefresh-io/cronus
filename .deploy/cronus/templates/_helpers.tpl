@@ -53,3 +53,23 @@ Calculates storage size
 {{- $storageSize := coalesce .Values.storageSize .Values.store.size -}}
 {{- printf "%s" $storageSize -}}
 {{- end -}}
+
+{{/*
+   Create a default fully qualified app name.
+   We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+   If release name contains chart name it will be used as a full name.
+  */}}
+{{- define "cronus.fqdn" -}}
+  {{- $name := "" -}}
+  {{- if $.Values.fullnameOverride -}}
+    {{- $name =$.Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+  {{- else -}}
+    {{- $name = default .Chart.Name .Values.nameOverride -}}
+    {{- if contains $name .Release.Name -}}
+    {{- $name = .Release.Name | trunc 63 | trimSuffix "-" -}}
+    {{- else -}}
+    {{- $name = printf "%s-%s" .Release.Name $name -}}
+  {{- end -}}
+  {{- end -}}
+{{- printf "%s.%s.svc.cluster.local" $name .Release.Namespace  | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
