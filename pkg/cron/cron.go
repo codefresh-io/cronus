@@ -139,6 +139,7 @@ func (r *Runner) TriggerEvent(e types.Event) error {
 
 	// pass event details
 	event.Variables["message"] = e.Message
+	event.Variables["description"] = e.Description
 	event.Variables["timestamp"] = time.Now().Format(time.RFC3339)
 
 	// attempt to invoke trigger
