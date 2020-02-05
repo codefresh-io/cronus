@@ -39,7 +39,7 @@ POST ${HERMES_SERVICE}/trigger/${event}
 
 When using cron event URI with `cronus` REST API, make sure to apply URL encoding to it.
 
-## CRON Expression Format
+## CRON Expression Format 
 
 [CRON Expression Format](./docs/expression.md)
 
