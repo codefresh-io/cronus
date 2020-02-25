@@ -36,6 +36,11 @@ spec:
         action: {{ .Values.event.action }}
         version: {{ .version | default "base" | quote  }}
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsGroup: 0
+        fsGroup: 0
+        runAsUser: 1000
       volumes:
       - name: boltdb-store
         persistentVolumeClaim:
@@ -74,6 +79,8 @@ spec:
           volumeMounts:
             - mountPath: "/var/boltdb"
               name: boltdb-store
+          securityContext:
+            allowPrivilegeEscalation: false
           livenessProbe:
             httpGet:
               path: /health
