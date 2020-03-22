@@ -36,11 +36,11 @@ spec:
         action: {{ .Values.event.action }}
         version: {{ .version | default "base" | quote  }}
     spec:
+      {{- $podSecurityContext := (kindIs "invalid" .Values.global.podSecurityContextOverride) | ternary .Values.podSecurityContext .Values.global.podSecurityContextOverride }}
+      {{- with $podSecurityContext }}
       securityContext:
-        runAsNonRoot: true
-        runAsGroup: 0
-        fsGroup: 0
-        runAsUser: 1000
+{{ toYaml . | indent 8}}
+      {{- end }}
       volumes:
       - name: boltdb-store
         persistentVolumeClaim:
