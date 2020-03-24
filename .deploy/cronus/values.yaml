@@ -3,7 +3,11 @@ global:
   istio:
     enabled: false
 
-
+podSecurityContext:
+  runAsNonRoot: true
+  runAsGroup: 0
+  fsGroup: 0
+  runAsUser: 1000
 # Default values for cronus.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
