@@ -36,10 +36,12 @@ spec:
         action: {{ .Values.event.action }}
         version: {{ .version | default "base" | quote  }}
     spec:
+      {{- if not .Values.global.devEnvironment }}
       {{- $podSecurityContext := (kindIs "invalid" .Values.global.podSecurityContextOverride) | ternary .Values.podSecurityContext .Values.global.podSecurityContextOverride }}
       {{- with $podSecurityContext }}
       securityContext:
 {{ toYaml . | indent 8}}
+      {{- end }}
       {{- end }}
       volumes:
       - name: boltdb-store
@@ -79,8 +81,10 @@ spec:
           volumeMounts:
             - mountPath: "/var/boltdb"
               name: boltdb-store
+          {{- if not .Values.global.devEnvironment }}
           securityContext:
             allowPrivilegeEscalation: false
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /health
