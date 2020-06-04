@@ -17,22 +17,22 @@ func TestAPIEndpoint_DescribeCronExpression(t *testing.T) {
 		{
 			name: "basic expression",
 			args: args{expression: "5 4 * * *"},
-			want: "At 04:05 AM",
+			want: "2020-06-05 04:05:00 +0300 EEST",
 		},
 		{
 			name: "complex expression",
 			args: args{expression: "23 0-20/2 * * *"},
-			want: "At 23 minutes past the hour, every 2 hours, between 12:00 AM and 08:59 PM",
+			want: "2020-06-04 16:23:00 +0300 EEST",
 		},
 		{
 			name: "@weekly expression",
 			args: args{expression: "@weekly"},
-			want: "At 12:00 AM, only on Sunday",
+			want: "2020-06-07 00:00:00 +0300 EEST",
 		},
 		{
 			name: "@annually expression",
 			args: args{expression: "@annually"},
-			want: "At 12:00 AM, on day 1 of the month, only in January",
+			want: "2021-01-01 00:00:00 +0200 EET",
 		},
 		{
 			name:    "bad expression",
@@ -43,8 +43,8 @@ func TestAPIEndpoint_DescribeCronExpression(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			api := NewCronDescriptorEndpoint()
-			got, err := api.DescribeCronExpression(tt.args.expression)
+			expr := NewCronExpression()
+			got, err := expr.DescribeCronExpression(tt.args.expression)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("APIEndpoint.DescribeCronExpression() error = %v, wantErr %v", err, tt.wantErr)
 				return
