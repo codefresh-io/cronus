@@ -22,7 +22,7 @@ func TestAPIEndpoint_DescribeCronExpression(t *testing.T) {
 		{
 			name: "complex expression",
 			args: args{expression: "23 0-20/2 * * *"},
-			want: "2020-06-04 16:23:00 +0300 EEST",
+			want: "2020-06-04 18:23:00 +0300 EEST",
 		},
 		{
 			name: "@weekly expression",
