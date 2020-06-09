@@ -2,6 +2,7 @@ package cronexp
 
 import (
 	"testing"
+	"time"
 )
 
 func TestAPIEndpoint_DescribeCronExpression(t *testing.T) {
@@ -49,8 +50,13 @@ func TestAPIEndpoint_DescribeCronExpression(t *testing.T) {
 				t.Errorf("APIEndpoint.DescribeCronExpression() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("APIEndpoint.DescribeCronExpression() = %v, want %v", got, tt.want)
+			if got == "" {
+				return
+			}
+
+			_, err = time.Parse(time.RFC3339, got)
+			if err != nil {
+				t.Errorf("APIEndpoint.DescribeCronExpression() = %v. It is not a timestamp", got)
 			}
 		})
 	}

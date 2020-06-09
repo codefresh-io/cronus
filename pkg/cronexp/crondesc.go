@@ -29,6 +29,6 @@ func (expr *CronExpression) DescribeCronExpression(expression string) (string, e
 		return "", err
 	}
 
-	st := s.Next(time.Now()).String()
+	st := s.Next(time.Now()).Format(time.RFC3339)
 	return st, nil
 }
