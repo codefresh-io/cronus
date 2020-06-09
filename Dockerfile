@@ -23,6 +23,9 @@ WORKDIR /go/src/github.com/codefresh-io/cronus
 # copy sources
 COPY . .
 
+go mod init
+go mod tidy
+
 #
 # ------ Go Test Runner ------
 #
