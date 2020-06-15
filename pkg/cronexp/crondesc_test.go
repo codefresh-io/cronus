@@ -12,33 +12,27 @@ func TestAPIEndpoint_DescribeCronExpression(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    string
 		wantErr bool
 	}{
 		{
 			name: "basic expression",
-			args: args{expression: "5 4 * * *"},
-			want: "2020-06-05 04:05:00 +0300 EEST",
+			args: args{expression: "5 4 * * * ?"},
 		},
 		{
 			name: "complex expression",
-			args: args{expression: "23 0-20/2 * * *"},
-			want: "2020-06-04 18:23:00 +0300 EEST",
+			args: args{expression: "23 0-20/2 * * * ?"},
 		},
 		{
 			name: "@weekly expression",
 			args: args{expression: "@weekly"},
-			want: "2020-06-07 00:00:00 +0300 EEST",
 		},
 		{
 			name: "@annually expression",
 			args: args{expression: "@annually"},
-			want: "2021-01-01 00:00:00 +0200 EET",
 		},
 		{
 			name:    "bad expression",
 			args:    args{expression: "hello"},
-			want:    "",
 			wantErr: true,
 		},
 	}

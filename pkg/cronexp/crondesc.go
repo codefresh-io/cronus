@@ -23,7 +23,7 @@ func NewCronExpression() Service {
 func (expr *CronExpression) DescribeCronExpression(expression string) (string, error) {
 	log.WithField("expression", expression).Debug("describing cron expression")
 
-	c := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.DowOptional | cron.Descriptor)
+	c := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.DowOptional | cron.Descriptor)
 	s, err := c.Parse(expression)
 	if err != nil {
 		return "", err
