@@ -202,7 +202,7 @@ func runServer(c *cli.Context) error {
 	log.Debug("starting cron job runner")
 	runner = cron.NewCronRunner(store, hermesSvc, c.Int64("limit"))
 	// create cronguru service for cron expression description
-	cronguru = cronexp.NewCronDescriptorEndpoint()
+	cronguru = cronexp.NewCronExpression()
 
 	// set server port
 	port := c.Int("port")
