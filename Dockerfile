@@ -14,7 +14,7 @@
 #
 # ----- Go Dev Image ------
 #
-FROM golang:1.10 AS godev
+FROM golang:1.11 AS godev
 
 # set working directory
 RUN mkdir -p /go/src/github.com/codefresh-io/cronus
@@ -22,6 +22,9 @@ WORKDIR /go/src/github.com/codefresh-io/cronus
 
 # copy sources
 COPY . .
+
+ENV GO111MODULE=on
+RUN go mod tidy
 
 #
 # ------ Go Test Runner ------
