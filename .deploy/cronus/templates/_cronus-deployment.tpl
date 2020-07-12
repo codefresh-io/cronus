@@ -33,7 +33,6 @@ spec:
         release: {{ .Release.Name }}
         type: {{ .Values.event.type }}
         kind: {{ .Values.event.kind }}
-        action: {{ .Values.event.action }}
         version: {{ .version | default "base" | quote  }}
     spec:
       {{- if not .Values.global.devEnvironment }}
