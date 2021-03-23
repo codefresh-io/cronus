@@ -77,6 +77,11 @@ spec:
               value: {{ .Values.service.internalPort | quote }}
             - name: STORE_FILE
               value: "/var/boltdb/events.db"
+            - name: NEWRELIC_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Release.Name }}-{{ .Values.global.codefresh }}"
+                  key: newrelic-license-key
           volumeMounts:
             - mountPath: "/var/boltdb"
               name: boltdb-store
