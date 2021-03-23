@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	newrelic "github.com/newrelic/go-agent"
 	"net/http"
 	"net/url"
 	"os"
@@ -23,6 +24,8 @@ import (
 var runner *cron.Runner
 var store types.EventStore
 var cronguru cronexp.Service
+
+var nrApp newrelic.Application
 
 // HermesDryRun dry run stub
 type HermesDryRun struct {
@@ -113,6 +116,11 @@ Copyright © Codefresh.io`, version.ASCIILogo)
 			Usage:  "produce log in Codefresh JSON format",
 			EnvVar: "LOG_JSON",
 		},
+		cli.StringFlag{
+			Name:   "new-relic",
+			Usage:  "set New Relic License Key",
+			EnvVar: "NEWRELIC_LICENSE_KEY",
+		},
 	}
 
 	app.Run(os.Args)
@@ -148,6 +156,22 @@ func before(c *cli.Context) error {
 	traceHook.FunctionField = logger.FieldNamespace
 	traceHook.AppField = logger.FieldService
 	log.AddHook(traceHook)
+
+	// set new relic monitoring
+	newRelicLicense := c.GlobalString("new-relic")
+	if newRelicLicense != "" {
+		log.Debug("setting New Relic agent")
+		cfg := newrelic.NewConfig("cronus[kubernetes]", newRelicLicense)
+		var err error
+		nrApp, err = newrelic.NewApplication(cfg)
+		if nil != err {
+			log.WithError(err).Error("failed to setup New Relic agent with provided license")
+			return err
+		}
+		log.Debug("setting New Relic agent hook for Logrus logging")
+		nrHook := logger.NewNewRelicLogrusHook(nrApp, []log.Level{log.ErrorLevel, log.FatalLevel, log.PanicLevel})
+		log.AddHook(nrHook)
+	}
 
 	return nil
 }
